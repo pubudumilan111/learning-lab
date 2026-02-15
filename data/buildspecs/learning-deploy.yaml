@@ -1,0 +1,11 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - python3 -m pip install --upgrade pip
+      - python3 -m pip install -r requirements.txt
+  build:
+    commands:
+      - sceptre --dir learning-lab/config launch infra/learning-service.yaml
+      - sceptre --dir learning-lab/config describe-stack-outputs infra/learning-service.yaml

@@ -1,0 +1,7 @@
+template:
+  path: cicd/learning-sceptre-launch.yaml
+parameters:
+  BuildSpecFilePath: learning-lab/data/buildspecs/learning-deploy.yaml
+  GitHubAccount: {GitHubAccount}
+  GitHubRepo: calendarsnack-cicd
+  GitHubCodeStarConnectionArn: !stack_output infra/cicd/codestar-connection.yaml::CodeStarConnectionArn

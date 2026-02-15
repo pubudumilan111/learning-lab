@@ -1,0 +1,84 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: Minimal CodeBuild trigger that deploys the learning stack on main branch pushes.
+
+Parameters:
+  BuildSpecFilePath:
+    Type: String
+    Description: Buildspec path inside the target repository.
+
+  GitHubAccount:
+    Type: String
+    Description: GitHub account containing the repository.
+
+  GitHubCodeStarConnectionArn:
+    Type: String
+    Description: AWS CodeStar Connection used for webhook and source clone.
+
+  GitHubRepo:
+    Type: String
+    Description: GitHub repository to build from.
+
+Resources:
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/codebuild/${CodeBuildProject}
+      RetentionInDays: 7
+
+  CodeBuildProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Ref AWS::StackName
+      Description: Deploy learning stack through Sceptre on pushes to main.
+      ServiceRole: !GetAtt CodeBuildRole.Arn
+      Artifacts:
+        Type: NO_ARTIFACTS
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Type: LINUX_CONTAINER
+        Image: aws/codebuild/standard:7.0
+      Source:
+        Type: GITHUB
+        Location: !Sub "https://github.com/${GitHubAccount}/${GitHubRepo}.git"
+        BuildSpec: !Ref BuildSpecFilePath
+        GitCloneDepth: 0
+      Triggers:
+        Webhook: true
+        FilterGroups:
+          - - Type: EVENT
+              Pattern: PUSH
+            - Type: HEAD_REF
+              Pattern: refs/heads/main
+
+  CodeBuildRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codebuild.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: learning-sceptre-launch
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - codestar-connections:UseConnection
+                Resource: !Ref GitHubCodeStarConnectionArn
+              - Effect: Allow
+                Action:
+                  - cloudformation:*
+                  - s3:*
+                  - sns:*
+                Resource: "*"

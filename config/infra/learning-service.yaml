@@ -1,0 +1,4 @@
+template:
+  path: infra/learning-service.yaml
+parameters:
+  ProjectCode: {{ project_code }}

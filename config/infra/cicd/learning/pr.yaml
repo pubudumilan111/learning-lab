@@ -1,0 +1,7 @@
+template:
+  path: cicd/pull-request-action.yaml
+parameters:
+  BuildSpecFile: learning-lab/data/buildspecs/learning-validate.yaml
+  GitHubAccount: {GitHubAccount}
+  GitHubRepo: calendarsnack-cicd
+  GitHubCodeStarConnectionArn: !stack_output infra/cicd/codestar-connection.yaml::CodeStarConnectionArn

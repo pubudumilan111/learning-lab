@@ -1,0 +1,11 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - python3 -m pip install --upgrade pip
+      - python3 -m pip install cfn-lint
+  build:
+    commands:
+      - cfn-lint templates/infra/learning-service.yaml
+      - echo "Learning PR validation passed."

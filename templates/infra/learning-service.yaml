@@ -1,0 +1,40 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: Minimal training stack with a private S3 bucket and SNS topic.
+
+Parameters:
+  ProjectCode:
+    Type: String
+    Default: calendarsnack-learning
+    Description: Prefix used for naming learning resources.
+
+Resources:
+  LearningBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${ProjectCode}-${AWS::AccountId}-${AWS::Region}"
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+
+  LearningTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub "${ProjectCode}-alerts"
+
+Outputs:
+  BucketName:
+    Description: Learning bucket name.
+    Value: !Ref LearningBucket
+
+  TopicArn:
+    Description: Learning SNS topic ARN.
+    Value: !Ref LearningTopic
